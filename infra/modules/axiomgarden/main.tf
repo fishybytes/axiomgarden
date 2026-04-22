@@ -84,6 +84,35 @@ resource "vultr_object_storage" "db" {
   label      = "axiomgarden-${var.environment}-db"
 }
 
+# --- Object Storage Bucket ---
+
+resource "terraform_data" "create_bucket" {
+  triggers_replace = [vultr_object_storage.db.id]
+
+  provisioner "local-exec" {
+    interpreter = ["python3", "-c"]
+    command     = <<-PYEOF
+      import hmac, hashlib, base64, urllib.request, datetime
+      endpoint   = "https://${vultr_object_storage.db.s3_hostname}"
+      access_key = "${vultr_object_storage.db.s3_access_key}"
+      secret_key = "${vultr_object_storage.db.s3_secret_key}"
+      bucket     = "axiomgarden-${var.environment}-db"
+      now        = datetime.datetime.utcnow()
+      date_str   = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+      sts        = f"PUT\n\n\n{date_str}\n/{bucket}/"
+      sig        = base64.b64encode(hmac.new(secret_key.encode(), sts.encode(), hashlib.sha1).digest()).decode()
+      req        = urllib.request.Request(f"{endpoint}/{bucket}/", method="PUT",
+                     headers={"Date": date_str, "Authorization": f"AWS {access_key}:{sig}", "Content-Length": "0"})
+      try:
+          urllib.request.urlopen(req)
+          print(f"bucket {bucket} ready")
+      except urllib.error.HTTPError as e:
+          if e.code == 409: print(f"bucket {bucket} already exists")
+          else: raise
+    PYEOF
+  }
+}
+
 # --- DNS ---
 
 resource "cloudflare_record" "axiomgarden" {
