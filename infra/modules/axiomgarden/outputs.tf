@@ -5,8 +5,7 @@ output "vps_ip" {
 
 output "ssh_command" {
   description = "SSH command to connect to the VPS"
-  value       = "ssh -i .ssh/axiomgarden_${var.environment}_ed25519 root@${vultr_instance.axiomgarden.main_ip}"
-
+  value       = "ssh -p 443 -i .ssh/axiomgarden_${var.environment}_ed25519 root@${vultr_instance.axiomgarden.main_ip}"
 }
 
 output "domain" {

@@ -52,6 +52,10 @@ resource "vultr_ssh_key" "axiomgarden" {
 
 # --- VPS ---
 
+locals {
+  fqdn = var.subdomain == "@" ? var.apex_domain : "${var.subdomain}.${var.apex_domain}"
+}
+
 resource "vultr_instance" "axiomgarden" {
   plan        = var.plan
   region      = var.region
@@ -61,6 +65,15 @@ resource "vultr_instance" "axiomgarden" {
   ssh_key_ids = [vultr_ssh_key.axiomgarden.id]
   backups     = "disabled"
 
+  user_data = templatefile("${path.module}/user_data.sh.tpl", {
+    environment           = var.environment
+    domain                = local.fqdn
+    litestream_bucket     = "axiomgarden-${var.environment}-db"
+    litestream_endpoint   = "https://${vultr_object_storage.db.s3_hostname}"
+    litestream_access_key = vultr_object_storage.db.s3_access_key
+    litestream_secret_key = vultr_object_storage.db.s3_secret_key
+    auth_secret           = random_password.auth_secret.result
+  })
 }
 
 # --- Object Storage (for Litestream SQLite replication) ---
@@ -85,11 +98,7 @@ resource "namecheap_domain_records" "axiomgarden" {
   }
 }
 
-# --- Ansible Inventory ---
-
-locals {
-  fqdn = var.subdomain == "@" ? var.apex_domain : "${var.subdomain}.${var.apex_domain}"
-}
+# --- Ansible Inventory (for ad-hoc config management) ---
 
 resource "local_sensitive_file" "ansible_inventory" {
   filename = "${path.root}/../../../ansible/inventory/${var.environment}.ini"
@@ -107,4 +116,11 @@ resource "local_sensitive_file" "ansible_inventory" {
     auth_secret=${random_password.auth_secret.result}
   EOT
   file_permission = "0600"
+}
+
+# --- VPS IP for CI/CD (non-sensitive, committed to repo) ---
+
+resource "local_file" "server_ip" {
+  content  = vultr_instance.axiomgarden.main_ip
+  filename = "${path.root}/../../../infra/environments/${var.environment}/server_ip"
 }
