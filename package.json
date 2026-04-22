@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:migrate": "node -e \"require('./lib/db.js').migrate()\""
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "next": "15.3.1",
@@ -15,6 +17,7 @@
     "react-dom": "^19.0.0",
     "next-auth": "^5.0.0-beta.25",
     "better-sqlite3": "^11.9.1",
+    "drizzle-orm": "^0.41.0",
     "bcryptjs": "^3.0.2",
     "zod": "^3.24.2",
     "uuid": "^11.1.0"
@@ -29,6 +32,7 @@
     "@types/uuid": "^10.0.0",
     "tailwindcss": "^4",
     "@tailwindcss/postcss": "^4",
+    "drizzle-kit": "^0.30.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.1"
   }

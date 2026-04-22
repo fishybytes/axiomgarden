@@ -23,3 +23,9 @@ output "object_storage_bucket" {
   description = "Litestream replication bucket name"
   value       = "axiomgarden-${var.environment}-db"
 }
+
+output "auth_secret" {
+  description = "AUTH_SECRET for Next.js Auth.js"
+  value       = random_password.auth_secret.result
+  sensitive   = true
+}

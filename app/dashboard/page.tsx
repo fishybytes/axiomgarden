@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { signOut } from "@/lib/auth";
 import Link from "next/link";
-import db from "@/lib/db";
+import { eq, asc } from "drizzle-orm";
+import { db, schema } from "@/lib/db";
 import GardenGrid from "@/components/GardenGrid";
 import { checkin } from "@/lib/actions";
 import type { Plant, Checkin } from "@/types";
@@ -15,12 +16,18 @@ export default async function DashboardPage() {
   const username = session.user.name!;
 
   const plants = db
-    .prepare("SELECT * FROM plants WHERE user_id = ? ORDER BY position ASC")
-    .all(userId) as Plant[];
+    .select()
+    .from(schema.plants)
+    .where(eq(schema.plants.userId, userId))
+    .orderBy(asc(schema.plants.position))
+    .all() as Plant[];
 
   const checkins = db
-    .prepare("SELECT date FROM checkins WHERE user_id = ? ORDER BY date ASC")
-    .all(userId) as Pick<Checkin, "date">[];
+    .select({ date: schema.checkins.date })
+    .from(schema.checkins)
+    .where(eq(schema.checkins.userId, userId))
+    .orderBy(asc(schema.checkins.date))
+    .all() as Pick<Checkin, "date">[];
 
   const checkinDates = checkins.map((c) => c.date);
   const today = new Date().toISOString().slice(0, 10);

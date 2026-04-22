@@ -16,7 +16,16 @@ terraform {
       source  = "hashicorp/local"
       version = "~> 2.4"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
+}
+
+resource "random_password" "auth_secret" {
+  length  = 44
+  special = false
 }
 
 # --- SSH Key ---
@@ -109,6 +118,7 @@ resource "local_sensitive_file" "ansible_inventory" {
     litestream_endpoint=https://${vultr_object_storage.db.s3_hostname}
     litestream_access_key=${vultr_object_storage.db.s3_access_key}
     litestream_secret_key=${vultr_object_storage.db.s3_secret_key}
+    auth_secret=${random_password.auth_secret.result}
   EOT
   file_permission = "0600"
 }

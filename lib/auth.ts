@@ -1,7 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import db from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { db, schema } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -14,17 +15,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = db
-          .prepare("SELECT id, username, email, password_hash FROM users WHERE email = ?")
-          .get(credentials.email) as
-          | { id: string; username: string; email: string; password_hash: string }
-          | undefined;
+          .select()
+          .from(schema.users)
+          .where(eq(schema.users.email, credentials.email as string))
+          .get();
 
         if (!user) return null;
 
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.password_hash,
-        );
+        const valid = await bcrypt.compare(credentials.password as string, user.passwordHash);
         if (!valid) return null;
 
         return { id: user.id, name: user.username, email: user.email };
@@ -41,7 +39,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 });

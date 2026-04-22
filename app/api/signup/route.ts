@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import db from "@/lib/db";
+import { db, schema } from "@/lib/db";
 
-const schema = z.object({
+const signupSchema = z.object({
   username: z
     .string()
     .min(3)
@@ -16,19 +16,21 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const parsed = schema.safeParse(body);
+  const parsed = signupSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
   const { username, email, password } = parsed.data;
   const passwordHash = await bcrypt.hash(password, 12);
-  const id = uuidv4();
 
   try {
-    db.prepare(
-      "INSERT INTO users (id, username, email, password_hash) VALUES (?, ?, ?, ?)",
-    ).run(id, username.toLowerCase(), email.toLowerCase(), passwordHash);
+    db.insert(schema.users).values({
+      id: uuidv4(),
+      username: username.toLowerCase(),
+      email: email.toLowerCase(),
+      passwordHash,
+    }).run();
   } catch {
     return NextResponse.json({ error: "Username or email already taken" }, { status: 409 });
   }
