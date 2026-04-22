@@ -1,4 +1,9 @@
 ---
+# raw module works without Python — installs it so all subsequent modules work
+- name: Bootstrap Python3
+  ansible.builtin.raw: test -e /usr/bin/python3 || (apt-get update -qq && apt-get install -y -qq python3)
+  changed_when: false
+
 - name: Update apt cache
   apt:
     update_cache: true
