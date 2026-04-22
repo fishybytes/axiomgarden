@@ -19,7 +19,7 @@ Push to `main` to deploy to dev (`dev.axiomgarden.xyz`). The GitHub Actions work
 git push origin main
 ```
 
-Claude can deploy directly by merging changes to `main` and pushing. No manual steps required.
+Docker is not available in this dev environment, so the build and transfer steps run on GitHub Actions runners. Claude should push to `main` to trigger a deploy — no other manual steps needed. The SSH key and server IP are available locally at `.ssh/axiomgarden_dev_ed25519` and `infra/environments/dev/server_ip` if Docker becomes available.
 
 ## Dev setup
 
