@@ -1,3 +1,8 @@
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID for the apex domain"
+  type        = string
+}
+
 variable "apex_domain" {
   description = "Registered apex domain (e.g. axiomgarden.xyz)"
   type        = string

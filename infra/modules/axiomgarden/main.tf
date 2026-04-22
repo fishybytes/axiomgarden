@@ -4,6 +4,10 @@ terraform {
       source  = "vultr/vultr"
       version = "~> 2.19"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
     tls = {
       source  = "hashicorp/tls"
       version = "~> 4.0"
@@ -78,6 +82,17 @@ resource "vultr_object_storage" "db" {
   cluster_id = var.object_storage_cluster_id
   tier_id    = 2 # Standard — supports EWR; $18/mo base
   label      = "axiomgarden-${var.environment}-db"
+}
+
+# --- DNS ---
+
+resource "cloudflare_record" "axiomgarden" {
+  zone_id = var.cloudflare_zone_id
+  name    = var.subdomain
+  content = vultr_instance.axiomgarden.main_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
 }
 
 # --- Ansible Inventory (for ad-hoc config management) ---

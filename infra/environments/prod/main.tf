@@ -1,11 +1,12 @@
 module "axiomgarden" {
   source = "../../modules/axiomgarden"
 
-  environment = "prod"
-  apex_domain = var.apex_domain
-  subdomain   = "@"
-  plan        = "vc2-1c-2gb" # 1 vCPU, 2GB RAM
-  region      = var.region
+  environment        = "prod"
+  apex_domain        = var.apex_domain
+  subdomain          = "@"
+  plan               = "vc2-1c-2gb" # 1 vCPU, 2GB RAM
+  region             = var.region
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 output "vps_ip"      { value = module.axiomgarden.vps_ip }
