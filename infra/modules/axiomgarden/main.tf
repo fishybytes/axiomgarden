@@ -82,6 +82,7 @@ resource "vultr_instance" "axiomgarden" {
 
 resource "vultr_object_storage" "db" {
   cluster_id = var.object_storage_cluster_id
+  tier_id    = 1 # 250 GB / 1 TB transfer — lowest tier
   label      = "axiomgarden-${var.environment}-db"
 }
 
