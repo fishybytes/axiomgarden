@@ -1,0 +1,24 @@
+---
+- name: Create app directory
+  file:
+    path: /opt/axiomgarden
+    state: directory
+    mode: "0755"
+
+- name: Deploy docker-compose config
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/axiomgarden/docker-compose.yml
+    mode: "0644"
+
+- name: Deploy app environment file
+  template:
+    src: .env.j2
+    dest: /opt/axiomgarden/.env
+    mode: "0600"
+
+- name: Pull and start app
+  community.docker.docker_compose_v2:
+    project_src: /opt/axiomgarden
+    state: present
+    pull: always
