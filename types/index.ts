@@ -1,25 +1,25 @@
 export interface Plant {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
-  template_index: number;
-  angle_variation: number;
+  templateIndex: number;
+  angleVariation: number;
   color: string;
-  planted_at: number; // unix timestamp
+  plantedAt: number; // unix timestamp
   position: number;
 }
 
 export interface Checkin {
   id: string;
-  user_id: string;
+  userId: string;
   date: string; // YYYY-MM-DD
-  plant_id: string;
-  created_at: number;
+  plantId: string;
+  createdAt: number;
 }
 
 export interface User {
   id: string;
   username: string;
   email: string;
-  created_at: number;
+  createdAt: number;
 }
