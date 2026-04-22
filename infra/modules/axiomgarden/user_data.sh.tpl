@@ -95,7 +95,7 @@ CEOF
 # --- App .env ---
 cat > /opt/axiomgarden/.env << 'EEOF'
 NODE_ENV=production
-NEXTAUTH_URL=http://${domain}
+AUTH_URL=http://${domain}
 AUTH_SECRET=${auth_secret}
 DATABASE_URL=file:/app/data/axiomgarden.db
 EEOF
