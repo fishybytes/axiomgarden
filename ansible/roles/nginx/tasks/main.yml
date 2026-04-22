@@ -1,0 +1,34 @@
+---
+- name: Install Nginx and Certbot
+  apt:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Deploy Nginx site config
+  template:
+    src: axiomgarden.conf.j2
+    dest: /etc/nginx/sites-available/axiomgarden
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Enable site
+  file:
+    src: /etc/nginx/sites-available/axiomgarden
+    dest: /etc/nginx/sites-enabled/axiomgarden
+    state: link
+  notify: Reload Nginx
+
+- name: Remove default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload Nginx
+
+- name: Enable and start Nginx
+  systemd:
+    name: nginx
+    enabled: true
+    state: started

@@ -1,14 +1,17 @@
 # Terraform
-infra/.terraform/
-infra/.terraform.lock.hcl
-infra/terraform.tfvars
-infra/terraform.tfstate
-infra/terraform.tfstate.backup
+infra/**/.terraform/
+infra/**/.terraform.lock.hcl
+infra/**/terraform.tfvars
+infra/**/terraform.tfstate
+infra/**/terraform.tfstate.backup
 
 # Generated SSH keys
 .ssh/
 
-# Node / Next.js (for later)
+# Ansible generated inventory (written by Terraform)
+ansible/inventory/*.ini
+
+# Node / Next.js
 node_modules/
 .next/
 .env

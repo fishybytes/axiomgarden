@@ -1,6 +1,5 @@
 vultr_api_key       = "YOUR_VULTR_API_KEY"
 namecheap_user_name = "fishybites"
 namecheap_api_key   = "YOUR_NAMECHEAP_API_KEY"
-domain              = "axiomgarden.xyz"
+apex_domain         = "axiomgarden.xyz"
 region              = "ewr"
-plan                = "vc2-1c-2gb"

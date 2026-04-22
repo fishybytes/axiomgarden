@@ -1,0 +1,10 @@
+---
+- name: Configure axiomgarden server
+  hosts: axiomgarden
+  become: false
+
+  roles:
+    - base
+    - docker
+    - nginx
+    - app
