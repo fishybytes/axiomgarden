@@ -10,7 +10,7 @@ interface Props {
 
 function plantAge(plant: Plant, checkinDates: string[]): number {
   // Age = number of check-ins since the plant was planted
-  const plantedDate = new Date(plant.planted_at * 1000).toISOString().slice(0, 10);
+  const plantedDate = new Date(plant.plantedAt * 1000).toISOString().slice(0, 10);
   const idx = checkinDates.indexOf(plantedDate);
   if (idx === -1) return 0;
   return checkinDates.length - idx - 1;
