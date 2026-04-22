@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from "next/navigation";
 import { eq, asc } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
