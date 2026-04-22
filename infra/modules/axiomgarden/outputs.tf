@@ -11,5 +11,15 @@ output "ssh_command" {
 
 output "domain" {
   description = "FQDN for this environment"
-  value       = var.subdomain == "@" ? var.apex_domain : "${var.subdomain}.${var.apex_domain}"
+  value       = local.fqdn
+}
+
+output "object_storage_endpoint" {
+  description = "Vultr object storage S3 endpoint"
+  value       = "https://${vultr_object_storage.db.s3_hostname}"
+}
+
+output "object_storage_bucket" {
+  description = "Litestream replication bucket name"
+  value       = "axiomgarden-${var.environment}-db"
 }

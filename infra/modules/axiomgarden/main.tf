@@ -69,6 +69,13 @@ resource "vultr_instance" "axiomgarden" {
   }
 }
 
+# --- Object Storage (for Litestream SQLite replication) ---
+
+resource "vultr_object_storage" "db" {
+  cluster_id = var.object_storage_cluster_id
+  label      = "axiomgarden-${var.environment}-db"
+}
+
 # --- DNS ---
 
 resource "namecheap_domain_records" "axiomgarden" {
@@ -85,7 +92,11 @@ resource "namecheap_domain_records" "axiomgarden" {
 
 # --- Ansible Inventory ---
 
-resource "local_file" "ansible_inventory" {
+locals {
+  fqdn = var.subdomain == "@" ? var.apex_domain : "${var.subdomain}.${var.apex_domain}"
+}
+
+resource "local_sensitive_file" "ansible_inventory" {
   filename = "${path.root}/../../ansible/inventory/${var.environment}.ini"
   content  = <<-EOT
     [axiomgarden]
@@ -93,6 +104,11 @@ resource "local_file" "ansible_inventory" {
 
     [axiomgarden:vars]
     environment=${var.environment}
-    domain=${var.subdomain == "@" ? var.apex_domain : "${var.subdomain}.${var.apex_domain}"}
+    domain=${local.fqdn}
+    litestream_bucket=axiomgarden-${var.environment}-db
+    litestream_endpoint=https://${vultr_object_storage.db.s3_hostname}
+    litestream_access_key=${vultr_object_storage.db.s3_access_key}
+    litestream_secret_key=${vultr_object_storage.db.s3_secret_key}
   EOT
+  file_permission = "0600"
 }

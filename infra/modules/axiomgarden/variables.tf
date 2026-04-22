@@ -45,3 +45,9 @@ variable "environment" {
     error_message = "environment must be dev or prod"
   }
 }
+
+variable "object_storage_cluster_id" {
+  description = "Vultr object storage cluster ID (2 = EWR/New Jersey)"
+  type        = number
+  default     = 2
+}

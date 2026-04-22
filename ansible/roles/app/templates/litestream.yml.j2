@@ -1,0 +1,13 @@
+dbs:
+  - path: /data/axiomgarden.db
+    replicas:
+      - type: s3
+        bucket: {{ litestream_bucket }}
+        path: db/
+        endpoint: {{ litestream_endpoint }}
+        # Vultr Object Storage is S3-compatible; region value is ignored but required
+        region: us-east-1
+        access-key-id: {{ litestream_access_key }}
+        secret-access-key: {{ litestream_secret_key }}
+        force-path-style: true
+        sync-interval: 1s

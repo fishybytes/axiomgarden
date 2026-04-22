@@ -5,6 +5,12 @@
     state: directory
     mode: "0755"
 
+- name: Deploy Litestream config
+  template:
+    src: litestream.yml.j2
+    dest: /opt/axiomgarden/litestream.yml
+    mode: "0600"
+
 - name: Deploy docker-compose config
   template:
     src: docker-compose.yml.j2
