@@ -5,11 +5,10 @@ import path from "path";
 import fs from "fs";
 import * as schema from "./schema";
 
-const DB_PATH = process.env.DATABASE_URL ?? path.join(process.cwd(), "data", "axiomgarden.db");
+const DB_PATH = (process.env.DATABASE_URL ?? path.join(process.cwd(), "data", "axiomgarden.db"))
+  .replace(/^file:/, "");
 
-if (!DB_PATH.startsWith("/app/data")) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-}
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const sqlite = new Database(DB_PATH);
 sqlite.pragma("journal_mode = WAL");
@@ -17,7 +16,6 @@ sqlite.pragma("foreign_keys = ON");
 
 export const db = drizzle(sqlite, { schema });
 
-// Run any pending migrations on startup
 migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
 
 export { schema };
