@@ -61,10 +61,11 @@ cat > /opt/axiomgarden/docker-compose.yml << 'CEOF'
 services:
   restore:
     image: litestream/litestream:0.3
+    entrypoint: ["/bin/sh", "-c"]
+    command: "[ -f /data/axiomgarden.db ] || litestream restore -if-replica-exists /data/axiomgarden.db"
     volumes:
       - db_data:/data
       - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
-    command: sh -c "[ -f /data/axiomgarden.db ] || litestream restore -if-replica-exists /data/axiomgarden.db"
     restart: "no"
   app:
     image: axiomgarden:${environment}
