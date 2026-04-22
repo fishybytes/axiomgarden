@@ -1,8 +1,9 @@
 "use server";
 
 import { v4 as uuidv4 } from "uuid";
+import { eq, and, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import db from "@/lib/db";
+import { db, schema } from "@/lib/db";
 import { generateGenome } from "@/lib/plant-gen";
 import { revalidatePath } from "next/cache";
 
@@ -14,26 +15,38 @@ export async function checkin() {
   const today = new Date().toISOString().slice(0, 10);
 
   const existing = db
-    .prepare("SELECT plant_id FROM checkins WHERE user_id = ? AND date = ?")
-    .get(userId, today);
+    .select({ plantId: schema.checkins.plantId })
+    .from(schema.checkins)
+    .where(and(eq(schema.checkins.userId, userId), eq(schema.checkins.date, today)))
+    .get();
 
-  if (existing) return; // already done today
+  if (existing) return;
 
-  const { cnt } = db
-    .prepare("SELECT COUNT(*) as cnt FROM plants WHERE user_id = ?")
-    .get(userId) as { cnt: number };
+  const [{ plantCount }] = db
+    .select({ plantCount: count() })
+    .from(schema.plants)
+    .where(eq(schema.plants.userId, userId))
+    .all();
 
   const plantId = uuidv4();
   const genome = generateGenome(plantId);
 
-  db.prepare(
-    `INSERT INTO plants (id, user_id, name, template_index, angle_variation, color, position)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(plantId, userId, genome.name, genome.templateIndex, genome.angleVariation, genome.color, cnt);
+  db.insert(schema.plants).values({
+    id: plantId,
+    userId,
+    name: genome.name,
+    templateIndex: genome.templateIndex,
+    angleVariation: genome.angleVariation,
+    color: genome.color,
+    position: plantCount,
+  }).run();
 
-  db.prepare(
-    "INSERT INTO checkins (id, user_id, date, plant_id) VALUES (?, ?, ?, ?)",
-  ).run(uuidv4(), userId, today, plantId);
+  db.insert(schema.checkins).values({
+    id: uuidv4(),
+    userId,
+    date: today,
+    plantId,
+  }).run();
 
   revalidatePath("/dashboard");
 }

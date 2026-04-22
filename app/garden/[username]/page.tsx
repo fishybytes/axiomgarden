@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
-import db from "@/lib/db";
+import { eq, asc } from "drizzle-orm";
+import { db, schema } from "@/lib/db";
 import GardenGrid from "@/components/GardenGrid";
-import type { Plant, Checkin, User } from "@/types";
+import type { Plant, Checkin } from "@/types";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -19,18 +20,26 @@ export default async function PublicGardenPage({ params }: Props) {
   const { username } = await params;
 
   const user = db
-    .prepare("SELECT id, username, created_at FROM users WHERE username = ?")
-    .get(username.toLowerCase()) as Pick<User, "id" | "username" | "created_at"> | undefined;
+    .select({ id: schema.users.id, username: schema.users.username })
+    .from(schema.users)
+    .where(eq(schema.users.username, username.toLowerCase()))
+    .get();
 
   if (!user) notFound();
 
   const plants = db
-    .prepare("SELECT * FROM plants WHERE user_id = ? ORDER BY position ASC")
-    .all(user.id) as Plant[];
+    .select()
+    .from(schema.plants)
+    .where(eq(schema.plants.userId, user.id))
+    .orderBy(asc(schema.plants.position))
+    .all() as Plant[];
 
   const checkins = db
-    .prepare("SELECT date FROM checkins WHERE user_id = ? ORDER BY date ASC")
-    .all(user.id) as Pick<Checkin, "date">[];
+    .select({ date: schema.checkins.date })
+    .from(schema.checkins)
+    .where(eq(schema.checkins.userId, user.id))
+    .orderBy(asc(schema.checkins.date))
+    .all() as Pick<Checkin, "date">[];
 
   const checkinDates = checkins.map((c) => c.date);
 
