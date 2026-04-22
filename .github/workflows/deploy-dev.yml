@@ -44,6 +44,14 @@ jobs:
             root@${{ steps.ip.outputs.ip }} \
             "sed -i 's|^NEXTAUTH_URL=|AUTH_URL=|' /opt/axiomgarden/.env || true"
 
+      - name: Sync docker-compose.yml
+        run: |
+          scp \
+            -i ~/.ssh/axiomgarden_dev_ed25519 \
+            -o StrictHostKeyChecking=no \
+            docker-compose.yml \
+            root@${{ steps.ip.outputs.ip }}:/opt/axiomgarden/docker-compose.yml
+
       - name: Restart containers
         run: |
           ssh \

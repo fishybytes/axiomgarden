@@ -64,7 +64,7 @@ services:
     volumes:
       - db_data:/data
       - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
-    command: restore -if-replica-exists /data/axiomgarden.db
+    command: sh -c "[ -f /data/axiomgarden.db ] || litestream restore -if-replica-exists /data/axiomgarden.db"
     restart: "no"
   app:
     image: axiomgarden:${environment}

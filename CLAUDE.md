@@ -21,6 +21,22 @@ git push origin main
 
 Docker is not available in this dev environment, so the build and transfer steps run on GitHub Actions runners. Claude should push to `main` to trigger a deploy — no other manual steps needed. The SSH key and server IP are available locally at `.ssh/axiomgarden_dev_ed25519` and `infra/environments/dev/server_ip` if Docker becomes available.
 
+### Checking deploy status
+
+`GH_TOKEN` is available in the environment. Use it to check GitHub Actions workflow runs:
+
+```bash
+# List recent runs
+curl -s -H "Authorization: Bearer $GH_TOKEN" \
+  "https://api.github.com/repos/fishybytes/axiomgarden/actions/runs?per_page=5" \
+  | python3 -c "import sys,json; runs=json.load(sys.stdin)['workflow_runs']; [print(r['status'], r['conclusion'], r['created_at']) for r in runs]"
+
+# Get logs for a specific run (replace RUN_ID)
+curl -s -H "Authorization: Bearer $GH_TOKEN" \
+  "https://api.github.com/repos/fishybytes/axiomgarden/actions/runs/RUN_ID/jobs" \
+  | python3 -c "import sys,json; [print(j['name'], j['conclusion'], [s['name'] for s in j['steps'] if s['conclusion']=='failure']) for j in json.load(sys.stdin)['jobs']]"
+```
+
 ## Dev setup
 
 ```bash
