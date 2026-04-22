@@ -1,12 +1,4 @@
 services:
-  restore:
-    image: litestream/litestream:0.3
-    entrypoint: ["/bin/sh", "-c"]
-    command: "[ -f /data/axiomgarden.db ] || litestream restore -if-replica-exists /data/axiomgarden.db"
-    volumes:
-      - db_data:/data
-      - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
-    restart: "no"
   app:
     image: axiomgarden:dev
     restart: unless-stopped
@@ -16,9 +8,6 @@ services:
       - db_data:/app/data
     env_file:
       - .env
-    depends_on:
-      restore:
-        condition: service_completed_successfully
   replicate:
     image: litestream/litestream:0.3
     volumes:
@@ -26,8 +15,5 @@ services:
       - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
     command: replicate
     restart: unless-stopped
-    depends_on:
-      restore:
-        condition: service_completed_successfully
 volumes:
   db_data:
