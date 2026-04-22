@@ -36,13 +36,13 @@ resource "tls_private_key" "axiomgarden" {
 
 resource "local_sensitive_file" "private_key" {
   content         = tls_private_key.axiomgarden.private_key_openssh
-  filename        = "${path.root}/../../.ssh/axiomgarden_${var.environment}_ed25519"
+  filename        = "${path.root}/../../../.ssh/axiomgarden_${var.environment}_ed25519"
   file_permission = "0600"
 }
 
 resource "local_file" "public_key" {
   content  = tls_private_key.axiomgarden.public_key_openssh
-  filename = "${path.root}/../../.ssh/axiomgarden_${var.environment}_ed25519.pub"
+  filename = "${path.root}/../../../.ssh/axiomgarden_${var.environment}_ed25519.pub"
 }
 
 resource "vultr_ssh_key" "axiomgarden" {
@@ -61,28 +61,13 @@ resource "vultr_instance" "axiomgarden" {
   ssh_key_ids = [vultr_ssh_key.axiomgarden.id]
   backups     = "disabled"
 
-  connection {
-    type        = "ssh"
-    host        = self.main_ip
-    user        = "root"
-    private_key = tls_private_key.axiomgarden.private_key_openssh
-    timeout     = "5m"
-  }
-
-  # Minimal bootstrap — just enough for Ansible to connect
-  provisioner "remote-exec" {
-    inline = [
-      "apt-get update -qq",
-      "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3 python3-pip",
-    ]
-  }
 }
 
 # --- Object Storage (for Litestream SQLite replication) ---
 
 resource "vultr_object_storage" "db" {
   cluster_id = var.object_storage_cluster_id
-  tier_id    = 1 # 250 GB / 1 TB transfer — lowest tier
+  tier_id    = 2 # Standard — supports EWR; $18/mo base
   label      = "axiomgarden-${var.environment}-db"
 }
 
@@ -107,10 +92,10 @@ locals {
 }
 
 resource "local_sensitive_file" "ansible_inventory" {
-  filename = "${path.root}/../../ansible/inventory/${var.environment}.ini"
+  filename = "${path.root}/../../../ansible/inventory/${var.environment}.ini"
   content  = <<-EOT
     [axiomgarden]
-    ${vultr_instance.axiomgarden.main_ip} ansible_user=root ansible_ssh_private_key_file=../../.ssh/axiomgarden_${var.environment}_ed25519
+    ${vultr_instance.axiomgarden.main_ip} ansible_user=root ansible_ssh_private_key_file=../.ssh/axiomgarden_${var.environment}_ed25519
 
     [axiomgarden:vars]
     environment=${var.environment}
