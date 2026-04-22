@@ -1,20 +1,3 @@
-variable "vultr_api_key" {
-  description = "Vultr API key"
-  type        = string
-  sensitive   = true
-}
-
-variable "namecheap_user_name" {
-  description = "Namecheap account username"
-  type        = string
-}
-
-variable "namecheap_api_key" {
-  description = "Namecheap API key"
-  type        = string
-  sensitive   = true
-}
-
 variable "apex_domain" {
   description = "Registered apex domain (e.g. axiomgarden.xyz)"
   type        = string

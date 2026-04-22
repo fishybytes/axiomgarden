@@ -4,10 +4,6 @@ terraform {
       source  = "vultr/vultr"
       version = "~> 2.19"
     }
-    namecheap = {
-      source  = "namecheap/namecheap"
-      version = "~> 2.1"
-    }
     tls = {
       source  = "hashicorp/tls"
       version = "~> 4.0"
@@ -82,20 +78,6 @@ resource "vultr_object_storage" "db" {
   cluster_id = var.object_storage_cluster_id
   tier_id    = 2 # Standard — supports EWR; $18/mo base
   label      = "axiomgarden-${var.environment}-db"
-}
-
-# --- DNS ---
-
-resource "namecheap_domain_records" "axiomgarden" {
-  domain = var.apex_domain
-  mode   = "MERGE"
-
-  record {
-    hostname = var.subdomain
-    type     = "A"
-    address  = vultr_instance.axiomgarden.main_ip
-    ttl      = 300
-  }
 }
 
 # --- Ansible Inventory (for ad-hoc config management) ---
