@@ -1,0 +1,19 @@
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+
+# Generated SSH keys
+.ssh/
+
+# Node / Next.js (for later)
+node_modules/
+.next/
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
