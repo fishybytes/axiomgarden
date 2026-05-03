@@ -1,15 +1,5 @@
 services:
 
-  # Restore DB from object storage on startup (exits when done)
-  restore:
-    image: litestream/litestream:0.3
-    volumes:
-      - db_data:/data
-      - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
-    command: restore -if-replica-exists /data/axiomgarden.db
-    restart: "no"
-
-  # Main application
   app:
     image: axiomgarden:{{ environment }}
     restart: unless-stopped
@@ -19,11 +9,7 @@ services:
       - db_data:/app/data
     env_file:
       - .env
-    depends_on:
-      restore:
-        condition: service_completed_successfully
 
-  # Continuously replicate SQLite to Vultr Object Storage
   replicate:
     image: litestream/litestream:0.3
     volumes:
@@ -31,9 +17,6 @@ services:
       - /opt/axiomgarden/litestream.yml:/etc/litestream.yml:ro
     command: replicate
     restart: unless-stopped
-    depends_on:
-      restore:
-        condition: service_completed_successfully
 
 volumes:
   db_data:
