@@ -7,6 +7,9 @@ import { eq, asc } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import GardenGrid from "@/components/GardenGrid";
 import { checkin } from "@/lib/actions";
+import { getToday } from "@/lib/dev-time";
+import { cookies } from "next/headers";
+import DevTimeControls from "@/components/DevTimeControls";
 import type { Plant, Checkin } from "@/types";
 
 export default async function DashboardPage() {
@@ -31,8 +34,11 @@ export default async function DashboardPage() {
     .all() as Pick<Checkin, "date">[];
 
   const checkinDates = checkins.map((c) => c.date);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await getToday();
   const checkedInToday = checkinDates.includes(today);
+  const devOffset = process.env.APP_ENV !== "prod"
+    ? parseInt((await cookies()).get("dev_day_offset")?.value ?? "0", 10)
+    : 0;
 
   return (
     <main className="min-h-dvh px-4 py-6">
@@ -76,6 +82,10 @@ export default async function DashboardPage() {
       )}
 
       <GardenGrid plants={plants} checkinDates={checkinDates} />
+
+      {process.env.APP_ENV !== "prod" && (
+        <DevTimeControls today={today} offset={devOffset} />
+      )}
     </main>
   );
 }
