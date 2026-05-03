@@ -133,7 +133,7 @@ resource "local_sensitive_file" "ansible_inventory" {
     ${vultr_instance.axiomgarden.main_ip} ansible_user=root ansible_ssh_private_key_file=../.ssh/axiomgarden_${var.environment}_ed25519
 
     [axiomgarden:vars]
-    environment=${var.environment}
+    app_env=${var.environment}
     domain=${local.fqdn}
     litestream_bucket=axiomgarden-${var.environment}-db
     litestream_endpoint=https://${vultr_object_storage.db.s3_hostname}
