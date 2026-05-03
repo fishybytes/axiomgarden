@@ -1,0 +1,8 @@
+---
+- name: Deploy axiomgarden
+  hosts: axiomgarden
+  become: false
+
+  roles:
+    - nginx
+    - app
