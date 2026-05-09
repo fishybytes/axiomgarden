@@ -36,18 +36,27 @@ jobs:
             root@${{ steps.ip.outputs.ip }} \
             "gunzip | docker load"
 
-      - name: Update .env on server
-        run: |
-          ssh \
-            -i ~/.ssh/axiomgarden_dev_ed25519 \
-            -o StrictHostKeyChecking=no \
-            root@${{ steps.ip.outputs.ip }} \
-            "sed -i 's|^NEXTAUTH_URL=|AUTH_URL=|' /opt/axiomgarden/.env || true"
+      - name: Install Ansible
+        run: pip install ansible --quiet
 
-      - name: Restart containers
+      - name: Write Ansible inventory
         run: |
-          ssh \
-            -i ~/.ssh/axiomgarden_dev_ed25519 \
-            -o StrictHostKeyChecking=no \
-            root@${{ steps.ip.outputs.ip }} \
-            "cd /opt/axiomgarden && docker compose up -d --remove-orphans 2>&1"
+          mkdir -p ansible/inventory
+          cat > ansible/inventory/dev.ini << EOF
+          [axiomgarden]
+          ${{ steps.ip.outputs.ip }} ansible_user=root ansible_ssh_private_key_file=~/.ssh/axiomgarden_dev_ed25519
+
+          [axiomgarden:vars]
+          app_env=dev
+          domain=dev.axiomgarden.xyz
+          litestream_bucket=axiomgarden-dev-db
+          litestream_endpoint=${{ secrets.DEV_LITESTREAM_ENDPOINT }}
+          litestream_access_key=${{ secrets.DEV_LITESTREAM_ACCESS_KEY }}
+          litestream_secret_key=${{ secrets.DEV_LITESTREAM_SECRET_KEY }}
+          auth_secret=${{ secrets.DEV_AUTH_SECRET }}
+          EOF
+
+      - name: Run Ansible playbook
+        run: ansible-playbook -i ansible/inventory/dev.ini ansible/deploy.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"

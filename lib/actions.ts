@@ -5,6 +5,7 @@ import { eq, and, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
 import { generateGenome } from "@/lib/plant-gen";
+import { getToday } from "@/lib/dev-time";
 import { revalidatePath } from "next/cache";
 
 export async function checkin() {
@@ -12,7 +13,7 @@ export async function checkin() {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const userId = session.user.id;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await getToday();
 
   const existing = db
     .select({ plantId: schema.checkins.plantId })
