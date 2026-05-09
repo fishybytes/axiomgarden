@@ -32,3 +32,12 @@
     name: nginx
     enabled: true
     state: started
+
+- name: Obtain Let's Encrypt certificate
+  command: >
+    certbot --nginx -d {{ domain }}
+    --non-interactive --agree-tos
+    -m fishybites@mailax.org
+    --redirect
+  args:
+    creates: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
